@@ -1,63 +1,100 @@
-<?php 
+<!doctype html>
+<html lang="en">
 
-include 'config.php';
-
-error_reporting(0);
-
-session_start();
-
-if (isset($_SESSION['username'])) {
-    header("Location: berhasil_login.php");
-}
-
-if (isset($_POST['submit'])) {
- $email = $_POST['email'];
- $password = md5($_POST['password']);
-
- $sql = "SELECT * FROM users WHERE email='$email' AND password='$password'";
- $result = mysqli_query($conn, $sql);
- if ($result->num_rows > 0) {
-  $row = mysqli_fetch_assoc($result);
-  $_SESSION['username'] = $row['username'];
-  header("Location: berhasil_login.php");
- } else {
-  echo "<script>alert('Email atau password Anda salah. Silahkan coba lagi!')</script>";
- }
-}
-
-?>
-
-<!DOCTYPE html>
-<html>
 <head>
- <meta charset="utf-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
- <link rel="stylesheet" type="text/css" href="style.css">
-
- <title>Niagahoster Tutorial</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <title>Login Akun</title>
 </head>
 <body>
- <div class="alert alert-warning" role="alert">
-  <?php echo $_SESSION['error']?>
- </div>
-
- <div class="container">
-  <form action="" method="POST" class="login-email">
-   <p class="login-text" style="font-size: 2rem; font-weight: 800;">Login</p>
-   <div class="input-group">
-    <input type="email" placeholder="Email" name="email" value="<?php echo $email; ?>" required>
-   </div>
-   <div class="input-group">
-    <input type="password" placeholder="Password" name="password" value="<?php echo $_POST['password']; ?>" required>
-   </div>
-   <div class="input-group">
-    <button name="submit" class="btn">Login</button>
-   </div>
-   <p class="login-register-text">Anda belum punya akun? <a href="register.php">Register</a></p>
-  </form>
- </div>
+    <div class="container" style="margin-top: 50px">
+        <div class="row">
+            <div class="col-md-5 offset-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <label>LOGIN</label>
+                        <hr>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" class="form-control" id="username" placeholder="Masukkan Username">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-control" id="password" placeholder="Masukkan Password">
+                        </div>
+                        <button class="btn btn-login btn-block btn-success">LOGIN</button>
+                    </div>
+                </div>
+                <div class="text-center" style="margin-top: 15px">
+                    Belum punya akun? <a href="register.php">Silahkan Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.all.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".btn-login").click(function() {
+                var username = $("#username").val();
+                var password = $("#password").val();
+                if (username.length == "") {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'Oops...',
+                        text: 'Username Wajib Diisi !'
+                    });
+                } else if (password.length == "") {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'Oops...',
+                        text: 'Password Wajib Diisi !'
+                    });
+                } else {
+                    $.ajax({
+                        url: "cek-login.php",
+                        type: "POST",
+                        data: {
+                            "username": username,
+                            "password": password
+                        },
+                        success: function(response) {
+                            let result = response.trim()
+                            if (result == "success") {
+                                Swal.fire({
+                                        type: 'success',
+                                        title: 'Login Berhasil!',
+                                        text: 'Anda akan di arahkan dalam 3 Detik',
+                                        timer: 3000,
+                                        showCancelButton: false,
+                                        showConfirmButton: false
+                                    })
+                                    .then(function() {
+                                        window.location.href = "../modul-siswa/dashboard.php";
+                                    });
+                            } else {
+                                Swal.fire({
+                                    type: 'error',
+                                    title: 'Login Gagal!',
+                                    text: 'silahkan coba lagi!'
+                                });
+                            }
+                            console.log(response);
+                        },
+                        error: function(response) {
+                            Swal.fire({
+                                type: 'error',
+                                title: 'Opps!',
+                                text: 'server error!'
+                            });
+                            console.log(response);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

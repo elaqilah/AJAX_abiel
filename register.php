@@ -1,81 +1,111 @@
-<?php 
+<!doctype html>
+<html lang="en">
 
-include 'config.php';
-
-error_reporting(0);
-
-session_start();
-
-if (isset($_SESSION['username'])) {
-    header("Location: index.php");
-}
-
-if (isset($_POST['submit'])) {
- $username = $_POST['username'];
- $email = $_POST['email'];
- $password = md5($_POST['password']);
- $cpassword = md5($_POST['cpassword']);
-
- if ($password == $cpassword) {
-  $sql = "SELECT * FROM users WHERE email='$email'";
-  $result = mysqli_query($conn, $sql);
-  if (!$result->num_rows > 0) {
-   $sql = "INSERT INTO users (username, email, password)
-     VALUES ('$username', '$email', '$password')";
-   $result = mysqli_query($conn, $sql);
-   if ($result) {
-    echo "<script>alert('Selamat, registrasi berhasil!')</script>";
-    $username = "";
-    $email = "";
-    $_POST['password'] = "";
-    $_POST['cpassword'] = "";
-   } else {
-    echo "<script>alert('Woops! Terjadi kesalahan.')</script>";
-   }
-  } else {
-   echo "<script>alert('Woops! Email Sudah Terdaftar.')</script>";
-  }
-  
- } else {
-  echo "<script>alert('Password Tidak Sesuai')</script>";
- }
-}
-
-?>
-
-<!DOCTYPE html>
-<html>
 <head>
- <meta charset="utf-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-
- <link rel="stylesheet" type="text/css" href="style.css">
-
- <title>Niagahoster Register</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <title>Register Akun</title>
 </head>
 <body>
- <div class="container">
-  <form action="" method="POST" class="login-email">
-            <p class="login-text" style="font-size: 2rem; font-weight: 800;">Register</p>
-   <div class="input-group">
-    <input type="text" placeholder="Username" name="username" value="<?php echo $username; ?>" required>
-   </div>
-   <div class="input-group">
-    <input type="email" placeholder="Email" name="email" value="<?php echo $email; ?>" required>
-   </div>
-   <div class="input-group">
-    <input type="password" placeholder="Password" name="password" value="<?php echo $_POST['password']; ?>" required>
+    <div class="container" style="margin-top: 50px">
+        <div class="row">
+            <div class="col-md-5 offset-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <label>REGISTER</label>
+                        <hr>
+                        <div class="form-group">
+                            <label>Nama Lengkap</label>
+                            <input type="text" class="form-control" id="nama_lengkap" placeholder="Masukkan Nama Lengkap">
+                        </div>
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" class="form-control" id="username" placeholder="Masukkan Username">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-control" id="password" placeholder="Masukkan Password">
+                        </div>
+                        <button class="btn btn-register btn-block btn-success">REGISTER</button>
+                    </div>
+                    
+                </div>
+                <div class="text-center" style="margin-top: 15px">
+                    Sudah punya akun? <a href="index.php">Silahkan Login</a>
+                </div>
             </div>
-            <div class="input-group">
-    <input type="password" placeholder="Confirm Password" name="cpassword" value="<?php echo $_POST['cpassword']; ?>" required>
-   </div>
-   <div class="input-group">
-    <button name="submit" class="btn">Register</button>
-   </div>
-   <p class="login-register-text">Anda sudah punya akun? <a href="index.php">Login </a></p>
-  </form>
- </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.all.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".btn-register").click(function() {
+                var nama_lengkap = $("#nama_lengkap").val();
+                var username = $("#username").val();
+                var password = $("#password").val();
+                if (nama_lengkap.length == "") {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'Oops...',
+                        text: 'Nama Lengkap Wajib Diisi !'
+                    });
+                } else if (username.length == "") {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'Oops...',
+                        text: 'Username Wajib Diisi !'
+                    });
+                } else if (password.length == "") {
+                    Swal.fire({
+                        type: 'warning',
+                        title: 'Oops...',
+                        text: 'Password Wajib Diisi !'
+                    });
+                } else {
+                    //ajax
+                    $.ajax({
+                        url: "simpan-register.php",
+                        type: "POST",
+                        data: {
+                            "nama_lengkap": nama_lengkap,
+                            "username": username,
+                            "password": password
+                        },
+                        success: function(response) {
+                            let result = response.trim()
+                            console.log(result)
+                            if (result == "success") {
+                                Swal.fire({
+                                    type: 'success',
+                                    title: 'Register Berhasil!',
+                                    text: 'silahkan login!'
+                                });
+                                $("#nama_lengkap").val('');
+                                $("#username").val('');
+                                $("#password").val('');
+                            } else {
+                                Swal.fire({
+                                    type: 'error',
+                                    title: 'Register Gagal!',
+                                    text: 'silahkan coba lagi!'
+                                });
+                            }
+                            console.log(response);
+                        },
+                        error: function(response) {
+                            Swal.fire({
+                                type: 'error',
+                                title: 'Opps!',
+                                text: 'server error!'
+                            });
+                        }
+                    })
+                }
+            });
+        });
+    </script>
 </body>
 </html>
